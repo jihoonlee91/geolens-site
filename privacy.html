@@ -1,0 +1,29 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>지오렌즈 개인정보처리방침</title>
+<style>
+:root{--bg:#0b0d12;--fg:#f2f2f2;--dim:#9aa0aa;--gold:#e8c987;--line:#262a33}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.7}
+main{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:28px;margin:0 0 8px}h2{font-size:20px;margin:36px 0 10px;color:var(--gold)}
+p,li{color:#d8dbe0}a{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}th{color:var(--dim);font-weight:600}
+code{background:#1a1d24;padding:2px 6px;border-radius:6px}
+.hero{padding:30px 0 10px}.tag{color:var(--dim)}footer{margin-top:48px;color:var(--dim);font-size:13px}
+</style></head><body><main><h1>지오렌즈 개인정보처리방침</h1>
+<p>시행일: 2026년 10월 12일 · 문의: jihoon91.lee@gmail.com</p>
+<p>지오렌즈(이하 “앱”)는 카메라에 비친 장소·하늘·물체의 정보를 보여주기 위해 꼭 필요한 정보만 처리합니다.</p>
+<h2>1. 처리하는 정보와 목적</h2>
+<table><thead><tr><th>정보</th><th>언제</th><th>목적</th><th>보관</th></tr></thead><tbody><tr><td>위치(GPS)</td><td>앱 사용 중</td><td>보고 있는 방향의 산·명소·맛집·비행기·위성 계산</td><td>기기에만 저장. 서버로 보낼 때는 주변 정보 조회용으로만 사용하며 약 200~300m 단위로 반올림해 지역 캐시로 보관(개인 식별 정보와 연결하지 않음)</td></tr><tr><td>카메라 영상</td><td>앱 사용 중</td><td>화면에 정보 겹쳐 보이기</td><td>기기 밖으로 보내지 않음</td></tr><tr><td>카메라 이미지 일부</td><td>“이게 뭐야?”를 누를 때만</td><td>AI 물체 인식</td><td>인식 후 즉시 폐기, 서버에 저장하지 않음</td></tr><tr><td>설치 ID(앱이 만든 무작위 값)</td><td>서버 기능 사용 시</td><td>하루 사용 한도·구독 확인</td><td>날짜별 사용 횟수, 구독 만료일</td></tr><tr><td>구독 정보</td><td>Pro 구매 시</td><td>구독 유효성 확인</td><td>만료일, 구매 식별자의 해시값</td></tr></tbody></table>
+<p>이름·전화번호·이메일·연락처·광고 ID는 수집하지 않습니다.</p>
+<h2>2. 외부 서비스로의 전송</h2>
+<p>기능 제공을 위해 아래 서비스에 필요한 최소 정보를 보냅니다.</p>
+<table><thead><tr><th>서비스</th><th>보내는 정보</th><th>목적</th></tr></thead><tbody><tr><td>Supabase(앱 서버, 호스팅)</td><td>반올림한 위치, 설치 ID, 인식할 이미지</td><td>앱 서버 운영</td></tr><tr><td>Google Gemini API(기본) / Anthropic Claude(보조)</td><td>인식할 이미지 일부, 대략적인 위치·방향</td><td>AI 물체 인식. Gemini 무료 등급은 Google이 서비스 개선에 입력 내용을 활용할 수 있음</td></tr><tr><td>카카오 로컬, Google Places</td><td>반올림한 위치, 장소 이름</td><td>주변 맛집·평점</td></tr><tr><td>GitHub Pages(지도 데이터 배포)</td><td>지도 타일 요청(약 2~55km 격자)</td><td>산·명소·맛집 데이터 내려받기</td></tr><tr><td>OpenStreetMap(Overpass)</td><td>반올림한 위치</td><td>도로·등산로</td></tr><tr><td>adsb.lol, adsbdb</td><td>대략적인 위치, 편명</td><td>비행기 위치·노선</td></tr><tr><td>Open Food Facts</td><td>바코드 번호</td><td>상품 정보</td></tr><tr><td>Google Play / Apple</td><td>구매 영수증</td><td>구독 확인</td></tr></tbody></table>
+<h2>3. 권리</h2>
+<ul><li>위치·카메라 권한은 휴대폰 설정에서 언제든 끌 수 있습니다(일부 기능이 동작하지 않을 수 있음).</li><li>서버에 남은 사용 기록·구독 기록의 삭제를 원하면 위 이메일로 요청해 주세요. 앱 메뉴의 설치 ID와 함께 보내 주시면 7일 이내 삭제합니다.</li><li>앱을 삭제하면 기기에 저장된 즐겨찾기·캐시가 모두 지워집니다.</li></ul>
+<h2>4. 아동</h2>
+<p>만 13세 미만을 대상으로 하지 않습니다.</p>
+<h2>5. 변경</h2>
+<p>변경 시 앱 스토어 페이지와 이 문서를 통해 알립니다.</p>
+<footer>지도 데이터 © OpenStreetMap contributors (ODbL 1.0)</footer></main></body></html>

@@ -1,0 +1,18 @@
+{
+  "generated": "2026-10-11T23:02:29+00:00",
+  "source": "south-korea-latest.osm.pbf",
+  "counts": {
+    "nature": 35894,
+    "natureTiles": 80,
+    "sights": 19457,
+    "food": 98022,
+    "sightsTiles": 1118,
+    "foodTiles": 4506
+  },
+  "grid": {
+    "nature": 0.5,
+    "sights": 0.1,
+    "food": 0.02
+  },
+  "license": "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright"
+}
