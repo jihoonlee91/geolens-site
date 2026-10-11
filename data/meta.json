@@ -1,12 +1,12 @@
 {
-  "generated": "2026-10-11T23:02:29+00:00",
+  "generated": "2026-10-11T23:27:10+00:00",
   "source": "south-korea-latest.osm.pbf",
   "counts": {
     "nature": 35894,
     "natureTiles": 80,
-    "sights": 19457,
+    "sights": 18259,
     "food": 98022,
-    "sightsTiles": 1118,
+    "sightsTiles": 1107,
     "foodTiles": 4506
   },
   "grid": {
