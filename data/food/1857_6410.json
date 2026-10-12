@@ -1,1 +1,1 @@
-{"elements":[{"type":"node","id":9005905575,"tags":{"amenity":"fast_food","cuisine":"burger","name":"맥도날드","name:en":"McDonald's","name:ko":"맥도날드"},"lat":37.145218,"lon":128.214101}]}
+{"elements":[{"type":"node","id":9005905575,"tags":{"amenity":"fast_food","cuisine":"burger","name":"맥도날드","name:en":"McDonald's","name:ko":"맥도날드"},"lat":37.145218,"lon":128.214101},{"type":"way","id":1567399923,"tags":{"amenity":"cafe","building":"yes","cuisine":"coffee_shop","name":"스타벅스","name:en":"Starbucks","name:ko":"스타벅스"},"center":{"lat":37.143726,"lon":128.213186}}]}
