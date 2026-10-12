@@ -7,12 +7,15 @@
     "sights": 18259,
     "food": 98022,
     "sightsTiles": 1107,
-    "foodTiles": 4506
+    "foodTiles": 4506,
+    "trailWays": 18313,
+    "trailTiles": 2565
   },
   "grid": {
     "nature": 0.5,
     "sights": 0.1,
-    "food": 0.02
+    "food": 0.02,
+    "trails": 0.05
   },
   "license": "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright"
 }
