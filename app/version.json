@@ -1,7 +1,7 @@
 {
-    "notesEn":  "Update test",
-    "apk":  "https://github.com/jihoonlee91/geolens-site/releases/download/test-v4/GeoLens.apk",
-    "versionCode":  4,
-    "versionName":  "1.0.4",
-    "notes":  "업데이트 테스트"
+    "notesEn":  "In-app updates and fixes from testing",
+    "apk":  "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.5/GeoLens.apk",
+    "versionCode":  5,
+    "versionName":  "1.0.5",
+    "notes":  "앱 안 업데이트 기능, 테스트에서 찾은 문제 수정"
 }
