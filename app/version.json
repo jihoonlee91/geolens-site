@@ -1,7 +1,7 @@
 {
-    "notesEn":  "In-app updates and fixes from testing",
-    "apk":  "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.5/GeoLens.apk",
-    "versionCode":  5,
-    "versionName":  "1.0.5",
-    "notes":  "앱 안 업데이트 기능, 테스트에서 찾은 문제 수정"
+  "versionCode": 6,
+  "versionName": "1.0.6",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.6/GeoLens.apk",
+  "notes": "직접 설치한 시험판에서 결제 화면 숨김, 켜 둔 채로도 업데이트 확인, 업데이트 설치 흐름 개선, AI 답변 정확도 개선",
+  "notesEn": "Hide purchases on test builds, update checks while open, smoother update install, more accurate AI facts"
 }
