@@ -1,7 +1,7 @@
 {
-  "versionCode": 6,
-  "versionName": "1.0.6",
-  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.6/GeoLens.apk",
-  "notes": "직접 설치한 시험판에서 결제 화면 숨김, 켜 둔 채로도 업데이트 확인, 업데이트 설치 흐름 개선, AI 답변 정확도 개선",
-  "notesEn": "Hide purchases on test builds, update checks while open, smoother update install, more accurate AI facts"
+  "versionCode": 7,
+  "versionName": "1.0.7",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.7/GeoLens.apk",
+  "notes": "공유 카드(정상 사진에 봉우리 이름·지오렌즈 표시 → 갤러리 저장·공유), 해돋이·해넘이 방향 라벨",
+  "notesEn": "Share card (peak names on your photo, save and share), sunrise and sunset direction labels"
 }
