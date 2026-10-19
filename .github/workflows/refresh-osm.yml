@@ -35,6 +35,10 @@ jobs:
           rm -rf data/nature data/sights data/food data/trails
           python tools/build_osm_tiles.py /tmp/kr.osm.pbf data
           python tools/build_trail_tiles.py /tmp/kr.osm.pbf data
+      - name: Famous peaks (100대 명산 → 새 OSM 봉우리 번호)
+        run: |
+          python tools/build_famous_peaks.py tools/famous_peaks.csv data | tee /tmp/famous.log
+          grep -q "forest100 100, bac100 100" /tmp/famous.log || { echo "100대 명산 매칭 누락 — 이전 famous.json 유지"; git checkout -- data/collections/famous.json; }
       - name: Sanity check
         run: |
           python - <<'EOF'
