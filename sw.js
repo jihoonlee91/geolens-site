@@ -1,5 +1,5 @@
 // 오프라인 지원: 앱 화면은 미리 저장(새 버전은 다음 실행 때), 지도·지형 자료는 한 번 받은 것을 산에서도(신호 없을 때) 그대로 사용.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = ['./', 'index.html', 'app.css', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png',
   'js/main.js', 'js/fusion.js', 'js/gps.js', 'js/geo.js', 'js/terrain.js', 'js/book.js', 'js/hangul.js', 'js/sky.js', 'js/layers.js', 'js/links.js', 'js/space.js'];
 

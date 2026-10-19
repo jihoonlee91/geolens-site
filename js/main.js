@@ -32,7 +32,7 @@ const famousName = f => (EN ? romanize(famousKo(f)) : famousKo(f));
 const shown = p => (!EN ? p.name : p.nameEn || romanize(p.name));
 const DATA = 'data';
 const PEAK_RADIUS = 40000;
-const settings = { fov: store.get('fov', 67), hideOccluded: store.get('hideOccluded', true) };
+const settings = { fov: store.get('fov', 67), hideOccluded: store.get('hideOccluded', true), skyline: store.get('skyline', true) };
 const LAYERS = ['peaks', 'paths', 'sights', 'sky', 'air', 'xray'];
 const layer = Object.assign({ peaks: true, paths: true, sights: true, sky: true, air: true, xray: false }, store.get('layers', {}));
 
@@ -123,16 +123,43 @@ function startSensors() {
     if (!sim) sensorMode = 'imu';
   });
   // 센서가 없는 PC: 끌어서 둘러보기 / 누르면 라벨 열기
-  let drag = null;
-  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, az: simLook.az, el: simLook.el, moved: false }; });
-  addEventListener('pointermove', e => {
-    if (!drag || sensorMode === 'imu' || sensorMode === 'compass') return;
-    const k = settings.fov / innerHeight, dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-    if (Math.hypot(dx, dy) > 6) drag.moved = true;
-    simLook = { az: (drag.az - dx * k + 360) % 360, el: Math.max(-80, Math.min(80, drag.el + dy * k)) };
-    if (sensorMode === 'none') sensorMode = 'sim';
+  // 누르기: 라벨 열기 / 한 손가락 좌우 끌기: 방향 미세 조정(능선·산에 라벨 맞추기, PC는 둘러보기) / 두 손가락: 화각
+  const ptrs = new Map(); let drag = null, pinch = null;
+  const real = () => sensorMode === 'imu' || sensorMode === 'compass';
+  cv.addEventListener('pointerdown', e => {
+    ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, fov: settings.fov }; drag = null; return; }
+    drag = { x: e.clientX, y: e.clientY, lx: e.clientX, az: simLook.az, el: simLook.el, moved: false, nudged: 0 };
   });
-  addEventListener('pointerup', e => { if (drag && !drag.moved) onTap(e.clientX, e.clientY); drag = null; });
+  addEventListener('pointermove', e => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pinch && ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
+      settings.fov = Math.round(Math.max(40, Math.min(95, pinch.fov * pinch.d / d)));
+      return;
+    }
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.hypot(dx, dy) > 8) drag.moved = true;
+    if (!drag.moved) return;
+    if (real()) {
+      const deg = (e.clientX - drag.lx) / focal() * 180 / Math.PI; drag.lx = e.clientX;
+      filter.nudge(-deg); drag.nudged -= deg; // 오른쪽으로 끌면 라벨도 오른쪽으로
+    } else {
+      const k = settings.fov / innerHeight;
+      simLook = { az: (drag.az - dx * k + 360) % 360, el: Math.max(-80, Math.min(80, drag.el + dy * k)) };
+      if (sensorMode === 'none') sensorMode = 'sim';
+    }
+  });
+  const up = e => {
+    ptrs.delete(e.pointerId);
+    if (pinch) { if (ptrs.size < 2) { store.set('fov', settings.fov); toast(T(`화각 ${settings.fov}° — 라벨 간격이 실제 산과 맞게`, `Field of view ${settings.fov}°`), 1.6); pinch = null; } drag = null; return; }
+    if (drag && !drag.moved && e.type === 'pointerup') onTap(e.clientX, e.clientY);
+    else if (drag?.moved && real() && Math.abs(drag.nudged) > 0.2) toast(T(`방향을 ${drag.nudged > 0 ? '+' : ''}${drag.nudged.toFixed(1)}° 맞췄어요 (설정에서 되돌리기)`, `Direction adjusted ${drag.nudged.toFixed(1)}°`), 2);
+    drag = null;
+  };
+  addEventListener('pointerup', up); addEventListener('pointercancel', up);
   const so = () => { screenAngle = (screen.orientation?.angle ?? window.orientation ?? 0) || 0; };
   so(); screen.orientation?.addEventListener?.('change', so); addEventListener('orientationchange', so);
 }
@@ -164,7 +191,7 @@ function startLocation() {
 }
 
 const last = { geo: null, peaks: null, lines: null, sights: null, places: null };
-let demReady = false;
+let demReady = false, demGen = 0;
 const moved = (k, lat, lon, m) => { if (last[k] && haversine(lat, lon, last[k].lat, last[k].lon) < m) return false; last[k] = { lat, lon }; return true; };
 
 function setObserver(lat, lon, acc) {
@@ -186,7 +213,7 @@ async function withVersion(fn) {
 
 async function loadDem(lat, lon) {
   await terrain.ensureArea(lat, lon, PEAK_RADIUS);
-  demReady = true;
+  demReady = true; demGen++;
   if (observer) { const o = observer; last.geo = null; setObserver(o.lat, o.lon, o.acc); }
 }
 
@@ -235,6 +262,56 @@ function recomputeGeo() {
   occQueue = [...peaks.filter(p => p.dist < PEAK_RADIUS && p.dist > 1200), ...sights.filter(s => s.dist > 400), ...places.filter(s => s.dist > 600)].sort((a, b) => a.dist - b.dist);
   updateSky(true);
 }
+// 능선 실루엣: 0.5°마다(720방향) 몇 프레임에 나눠 계산
+const SKY_STEP = 0.5;
+let skyline = [], skyNext = 0, skyFor = null;
+function processSkyline(budgetMs) {
+  if (!demReady || !observer) return;
+  // 20 m 넘게 움직이면 다시 계산(그동안은 이전 선을 보여 줌)
+  if (!skyFor || haversine(skyFor.lat, skyFor.lon, observer.lat, observer.lon) > 20 || Math.abs(skyFor.alt - observer.alt) > 5 || skyFor.dem !== demGen) {
+    skyFor = { lat: observer.lat, lon: observer.lon, alt: observer.alt, dem: demGen }; skyNext = 0;
+  }
+  const t0 = performance.now(), n = 360 / SKY_STEP;
+  if (skyNext >= n) return;
+  // 지금 보는 쪽부터 계산(먼저 보이게)
+  const start = Math.round(cameraAzEl(cameraQ()).az / SKY_STEP);
+  while (skyNext < n && performance.now() - t0 < budgetMs) {
+    const k = skyNext++, i = ((start + (k % 2 ? (k + 1) / 2 : -k / 2)) % n + n) % n, az = i * SKY_STEP;
+    skyline[i] = terrain.skylineRay(observer.lat, observer.lon, observer.alt, az).map(c => ({ ...c, dir: dirFromAzEl(az, c.el) }));
+  }
+}
+
+function drawSkyline(q, f) {
+  if (!skyline.length) return;
+  const qi = qconj(q), n = 360 / SKY_STEP, look = cameraAzEl(q);
+  const i0 = Math.round((look.az - 70) / SKY_STEP), i1 = Math.round((look.az + 70) / SKY_STEP);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  // 안쪽 능선(희미하게): 옆 방위의 비슷한 거리 능선과 잇기
+  g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = 1;
+  g.beginPath();
+  for (let j = i0; j < i1; j++) {
+    const a = skyline[((j % n) + n) % n], b = skyline[(((j + 1) % n) + n) % n];
+    if (!a || !b) continue;
+    for (let x = 0; x < a.length - 1; x++) {
+      const c = a[x], m = b.find(y => Math.abs(y.d - c.d) < Math.max(c.d, y.d) * 0.25);
+      if (!m) continue;
+      const s1 = projectDir(qi, f, c.dir), s2 = projectDir(qi, f, m.dir);
+      if (s1 && s2 && Math.abs(s1[0] - s2[0]) < 60) { g.moveTo(s1[0], s1[1]); g.lineTo(s2[0], s2[1]); }
+    }
+  }
+  g.stroke();
+  // 스카이라인(하늘과 맞닿은 선)
+  g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.6;
+  g.beginPath(); let prev = null;
+  for (let j = i0; j <= i1; j++) {
+    const a = skyline[((j % n) + n) % n], c = a && a[a.length - 1];
+    const s = c ? projectDir(qi, f, c.dir) : null;
+    if (s && prev && Math.abs(s[0] - prev[0]) < 80) g.lineTo(s[0], s[1]); else if (s) g.moveTo(s[0], s[1]);
+    prev = s;
+  }
+  g.stroke();
+}
+
 function processOcclusion(budgetMs) {
   if (!demReady || !observer) return;
   const t0 = performance.now();
@@ -344,6 +421,7 @@ const kindName = k => T(...(KIND[k] || ['', '']));
 function frame() {
   requestAnimationFrame(frame);
   processOcclusion(4);
+  if (layer.peaks && settings.skyline) processSkyline(4);
   draw(false);
   updateGuide();
   updateStatus();
@@ -359,6 +437,7 @@ function draw(shareMode) {
   const onScreen = s => s && s[0] > -40 && s[0] < W + 40 && s[1] > -40 && s[1] < H + 40;
   const inView = az => Math.abs(wrap180(az - look.az)) < 80;
 
+  if (layer.peaks && settings.skyline) drawSkyline(q, f);
   if (layer.sky) { drawPath(q, f, sunPath, COL.sun); drawPath(q, f, moonPath, COL.moon); }
   if (layer.paths) drawLines(q, f);
   const dark = sun && sun.alt < -4; // 해 진 뒤: 별·별자리
@@ -980,6 +1059,7 @@ function showMenu() {
   sec(b, T('방향·화면', 'Direction & view'));
   row(b, T('나침반 다시 맞추기', 'Reset compass alignment'), T('[방향 맞춤]으로 바꾼 보정을 지우고 나침반을 다시 따라가요', 'Clears manual alignment and follows the compass again'), '', 'peak', () => { filter.resetAlignment(); toast(T('폰을 들고 8자를 그려 주세요', 'Wave your phone in a figure 8')); $('#panel').hidden = true; });
   row(b, T('앞산에 가린 봉우리 숨기기', 'Hide peaks behind hills'), settings.hideOccluded ? T('켜짐 — 실제로 보이는 봉우리만(산 너머 칩을 켜면 점선으로)', 'On — visible peaks only (Beyond ridges shows them dashed)') : T('꺼짐 — 가려진 봉우리도', 'Off — hidden peaks too'), '', 'peak', () => { settings.hideOccluded = !settings.hideOccluded; store.set('hideOccluded', settings.hideOccluded); showMenu(); });
+  row(b, T('능선 선 보기', 'Show ridge lines'), settings.skyline ? T('켜짐 — 지형으로 계산한 능선을 실제 산과 비교, 좌우로 끌어 방향 맞춤', 'On — compare computed ridges with the real ones; drag sideways to align') : T('꺼짐', 'Off'), '', 'peak', () => { settings.skyline = !settings.skyline; store.set('skyline', settings.skyline); showMenu(); });
   b.insertAdjacentHTML('beforeend', `<div class="note">${T('화각(카메라에 맞추기)', 'Field of view (match your camera)')}: <b id="fovv">${settings.fov}°</b><input id="fov" type="range" min="45" max="90" step="1" value="${settings.fov}"><br>${T('산 라벨이 실제 산보다 바깥쪽에 뜨면 줄이고, 안쪽이면 늘리세요.', 'If labels sit outside the real peaks, lower it; inside, raise it.')}</div>`);
   b.querySelector('#fov').oninput = e => { settings.fov = +e.target.value; store.set('fov', settings.fov); b.querySelector('#fovv').textContent = settings.fov + '°'; };
   sec(b, T('센서 상태', 'Sensors'));

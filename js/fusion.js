@@ -211,6 +211,14 @@ export class OrientationFilter {
     this.lastInnov = null;
   }
 
+  /** 손으로 끌어 방향 미세 조정: 카메라 방위를 deg(도)만큼 시계 방향으로. 나침반 기준에도 반영돼 유지된다. */
+  nudge(deg) {
+    const d = -deg * D2R;
+    this.userYaw = wrapPi(this.userYaw + d);
+    this.q = this.rotateYaw(this.q, d);
+    this.lastInnov = null;
+  }
+
   resetAlignment() { this.userYaw = 0; this.lastInnov = null; this.startT = this.now(); }
 }
 

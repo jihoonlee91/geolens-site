@@ -61,6 +61,33 @@ function sample(lat, lon, z) {
 }
 
 /**
+ * 능선 실루엣: 방위마다 바깥으로 걸어가며 올려볼 각이 새 최댓값이 되는 지점(보이는 땅)을 따라가고,
+ * 그 뒤로 각이 내려가면 그 지점을 '능선 꼭대기'로 기록한다. 마지막 꼭대기가 하늘과 맞닿은 스카이라인.
+ * 반환: 방위 a(도)마다 [{d, el}] (가까운 능선 → 먼 능선, 마지막이 스카이라인). 자료 없으면 빈 배열.
+ */
+export function skylineRay(oLat, oLon, oAlt, az, maxDist = 40000) {
+  const R = 6371008.8, k = 0.13, D2R = Math.PI / 180, cosLat = Math.cos(oLat * D2R);
+  const se = Math.sin(az * D2R), ce = Math.cos(az * D2R);
+  const crests = [];
+  let best = -90, prevEl = -90, prevD = 0, rising = false, any = false;
+  for (let d = 60; d <= maxDist; d += Math.max(30, d * 0.012)) {
+    const lat = oLat + d * ce / 111320, lon = oLon + d * se / (111320 * cosLat);
+    const h = elevation(lat, lon);
+    if (Number.isNaN(h)) { if (d > 2000 && any) break; continue; }
+    any = true;
+    const el = Math.atan2(h - d * d / (2 * R) * (1 - k) - oAlt, d) * 180 / Math.PI;
+    if (el > best) { best = el; rising = true; }
+    else if (rising && el < prevEl - 0.05) { // 보이던 오르막이 끝남 → 능선
+      if (!crests.length || prevD - crests[crests.length - 1].d > 300) crests.push({ d: prevD, el: prevEl });
+      rising = false;
+    }
+    prevEl = el; prevD = d;
+  }
+  if (rising && any) crests.push({ d: prevD, el: prevEl });
+  return crests;
+}
+
+/**
  * 관측자 → 봉우리 시선이 지형에 막히는지. true(가림)/false(보임)/null(자료 없음).
  * 지구 곡률·굴절 반영, 봉우리 바로 앞 300 m와 내 발밑 150 m는 제외(격자 오차), 여유 12 m.
  */
