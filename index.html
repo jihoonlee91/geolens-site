@@ -2,69 +2,25 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>지오렌즈 — 비추면 산 이름이 보여요</title>
-<meta name="description" content="휴대폰 카메라로 비추면 산봉우리 이름·거리·높이가 화면에 떠요. 100대 명산 도감과 정상 인증, 해돋이 방향까지. 설치 없이 크롬에서 바로, 홈 화면에 앱처럼 설치도 돼요.">
-<meta name="theme-color" content="#08090c">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta property="og:title" content="지오렌즈 — 비추면 산 이름이 보여요">
-<meta property="og:description" content="카메라로 비추면 봉우리 이름·거리·높이. 100대 명산 도감과 정상 인증.">
-<meta property="og:image" content="https://jihoonlee91.github.io/geolens-site/icons/icon-512.png">
-<link rel="stylesheet" href="app.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>지오렌즈</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #08090c; color: rgba(255,255,255,.9);
+    font: 16px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; text-align: center; padding: 0 16px; }
+  img { width: 88px; height: 88px; border-radius: 22px; }
+  p { color: rgba(255,255,255,.55); }
+  a { color: #e8c987; }
+</style>
 </head>
 <body>
-<video id="cam" playsinline muted autoplay></video>
-<img id="cmpImg" alt="" hidden>
-<canvas id="view"></canvas>
-
-<div id="chips"></div>
-<section id="compare" hidden>
-  <div class="cbar glass"><div class="cap"></div><input type="range" min="0" max="100" value="55" aria-label="겹치기 정도"><button class="x" aria-label="닫기">×</button></div>
-</section>
-
-<div id="top">
-  <div id="install" class="chip gold" hidden>앱 설치</div>
-  <div id="status" class="pill" hidden></div>
-</div>
-
-<div id="guide" class="glass" hidden>
-  <div class="gt"></div><div class="gs"></div><button class="x" aria-label="안내 끄기">×</button>
-</div>
-
-<div id="toast" class="glass" hidden></div>
-
-<nav id="bar">
-  <button id="bBook" class="round" aria-label="도감"><svg viewBox="0 0 96 96"><path d="M48 6l12 28 30 3-23 20 7 30-26-16-26 16 7-30L6 37l30-3z"/></svg><span data-ko="도감" data-en="Collection"></span></button>
-  <button id="bShot" class="shutter" aria-label="정상 사진"><span></span></button>
-  <button id="bMenu" class="round" aria-label="설정"><svg viewBox="0 0 96 96"><path d="M18 26h60M18 48h60M18 70h60" stroke-width="9" stroke-linecap="round"/></svg><span data-ko="설정" data-en="Settings"></span></button>
-</nav>
-
-<section id="sheet" class="glass" hidden></section>
-<section id="panel" hidden><div class="ph"><h2></h2><button class="x" aria-label="닫기">×</button></div><div class="pb"></div></section>
-
-<section id="welcome" hidden>
-  <button id="lang" class="langbtn"></button>
-  <div class="wbody">
-    <img src="icons/icon-192.png" alt="" class="logo">
-    <h1>지오렌즈</h1>
-    <p class="tag" data-ko="폰을 들어 비추면&lt;br&gt;산 이름·거리·높이가 바로 보여요" data-en="Point your phone and see&lt;br&gt;peak names, distance and height"></p>
-    <ul>
-      <li><b data-ko="카메라" data-en="Camera"></b><span data-ko="화면 위에 산 이름을 띄워요. 영상은 휴대폰 밖으로 나가지 않아요." data-en="Labels over the live view. Video never leaves your phone."></span></li>
-      <li><b data-ko="위치(GPS)" data-en="Location (GPS)"></b><span data-ko="서 있는 곳에서 산이 어느 쪽에 있는지 계산해요. 서버로 보내지 않아요." data-en="Works out where each peak is from where you stand. Not sent anywhere."></span></li>
-      <li><b data-ko="방향 센서" data-en="Motion sensors"></b><span data-ko="자이로·가속도계·나침반을 합쳐 보는 방향을 정확하게 잡아요." data-en="Gyro, accelerometer and compass are fused to track where you point."></span></li>
-    </ul>
-    <button id="start" class="primary" data-ko="시작하기" data-en="Get started"></button>
-    <button id="install2" class="ghost" hidden data-ko="홈 화면에 앱으로 설치" data-en="Install as an app"></button>
-    <p id="andHint" class="hint" hidden data-ko="홈 화면에 설치: 크롬 메뉴(⋮) → '앱 설치' 또는 '홈 화면에 추가'" data-en="Install: Chrome menu (⋮) → 'Install app' or 'Add to Home screen'"></p>
-    <p id="iosHint" class="hint" hidden data-ko="아이폰: Safari 아래 공유 버튼 → '홈 화면에 추가'" data-en="iPhone: Safari Share button → 'Add to Home Screen'"></p>
-    <p class="hint"><a href="privacy.html" data-ko="개인정보처리방침" data-en="Privacy"></a> · <a id="apk" href="https://github.com/jihoonlee91/geolens-site/releases/latest/download/GeoLens.apk" data-ko="안드로이드 앱(APK)" data-en="Android app (APK)"></a></p>
-  </div>
-</section>
-
-<script type="module" src="js/main.js"></script>
+<main>
+  <img src="icons/icon-192.png" alt="">
+  <h1>지오렌즈</h1>
+  <p>비공개로 시험 중인 앱이에요.</p>
+  <p><a href="privacy.html">개인정보처리방침</a></p>
+</main>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
