@@ -1,7 +1,7 @@
 {
-  "versionCode": 10,
-  "versionName": "1.0.10",
-  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.10/GeoLens.apk",
-  "notes": "가로 화면 지원: 폰을 눕혀도 라벨·방향이 맞고 버튼 크기 그대로",
-  "notesEn": "Landscape support: labels and direction stay right when you turn the phone sideways"
+  "versionCode": 11,
+  "versionName": "1.0.11",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.11/GeoLens.apk",
+  "notes": "새 이름 '피크렌즈'와 새 아이콘",
+  "notesEn": "New name 'PeakLens' and a new icon"
 }
