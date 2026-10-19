@@ -1,7 +1,7 @@
 {
-  "versionCode": 8,
-  "versionName": "1.0.8",
-  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.8/GeoLens.apk",
-  "notes": "봉우리 도감: 산 라벨을 열면 담기고, 정상에 서면 자동 '정상 인증'. 100대 명산(산림청·블랙야크) 진행률, 정상 사진 남기기, 기록 내보내기",
-  "notesEn": "Peak collection: tap peak labels to collect them, automatic summit check-in, Top 100 progress, summit photo, CSV export"
+  "versionCode": 9,
+  "versionName": "1.0.9",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.9/GeoLens.apk",
+  "notes": "길찾기에서 네이버·카카오·구글 지도 앱 고르기. 웹 버전 출시: 크롬에서 jihoonlee91.github.io/geolens-site 열고 홈 화면에 설치",
+  "notesEn": "Directions: choose Naver, Kakao or Google Maps. Web version: open jihoonlee91.github.io/geolens-site in Chrome and install"
 }
