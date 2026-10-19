@@ -11,14 +11,17 @@
                    "trailWays":  17223,
                    "trailTiles":  2514,
                    "lineWays":  401421,
-                   "lineTiles":  25994
+                   "lineTiles":  25994,
+                   "buildings":  117220,
+                   "buildingTiles":  1721
                },
     "grid":  {
                  "nature":  0.5,
                  "sights":  0.1,
                  "food":  0.02,
                  "trails":  0.05,
-                 "lines":  0.02
+                 "lines":  0.02,
+                 "buildings":  0.02
              },
     "license":  "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright"
 }
