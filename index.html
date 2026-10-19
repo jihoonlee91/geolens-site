@@ -18,7 +18,13 @@
 </head>
 <body>
 <video id="cam" playsinline muted autoplay></video>
+<img id="cmpImg" alt="" hidden>
 <canvas id="view"></canvas>
+
+<div id="chips"></div>
+<section id="compare" hidden>
+  <div class="cbar glass"><div class="cap"></div><input type="range" min="0" max="100" value="55" aria-label="겹치기 정도"><button class="x" aria-label="닫기">×</button></div>
+</section>
 
 <div id="top">
   <div id="install" class="chip gold" hidden>앱 설치</div>
@@ -41,6 +47,7 @@
 <section id="panel" hidden><div class="ph"><h2></h2><button class="x" aria-label="닫기">×</button></div><div class="pb"></div></section>
 
 <section id="welcome" hidden>
+  <button id="lang" class="langbtn"></button>
   <div class="wbody">
     <img src="icons/icon-192.png" alt="" class="logo">
     <h1>지오렌즈</h1>

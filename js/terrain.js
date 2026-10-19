@@ -1,19 +1,20 @@
 // 지형(DEM): AWS Terrain Tiles(terrarium PNG, 공개·무료, CORS 허용) z10 — 한 칸 약 120 m.
 // 내 위치의 땅 높이와, 봉우리가 앞산에 가려지는지(시선이 지형에 막히는지) 판정에 쓴다.
-const Z = 10, N = 256;
+// 내 주변 약 ±10 km는 z12(한 칸 약 30 m)로 더 촘촘하게 — 내 발밑 높이·가까운 능선 가림이 정확해짐.
+const Z = 10, ZF = 12, N = 256;
 const URL = (z, x, y) => `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${z}/${x}/${y}.png`;
 
-const tiles = new Map(); // "x/y" → Float32Array | 'loading' | 'fail'
+const tiles = new Map(); // "z/x/y" → Float32Array | 'loading' | 'fail'
 
-const lon2x = lon => (lon + 180) / 360 * (1 << Z);
-const lat2y = lat => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * (1 << Z); };
+const lon2x = (lon, z = Z) => (lon + 180) / 360 * (1 << z);
+const lat2y = (lat, z = Z) => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * (1 << z); };
 
-async function load(x, y) {
-  const key = `${x}/${y}`;
+async function load(x, y, z = Z) {
+  const key = `${z}/${x}/${y}`;
   if (tiles.has(key)) return;
   tiles.set(key, 'loading');
   try {
-    const res = await fetch(URL(Z, x, y), { mode: 'cors' });
+    const res = await fetch(URL(z, x, y), { mode: 'cors' });
     if (!res.ok) throw new Error(res.status);
     const bmp = await createImageBitmap(await res.blob());
     const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(N, N) : Object.assign(document.createElement('canvas'), { width: N, height: N });
@@ -32,16 +33,24 @@ export async function ensureArea(lat, lon, radius) {
   const y0 = Math.floor(lat2y(lat + dLat)), y1 = Math.floor(lat2y(lat - dLat));
   const jobs = [];
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) jobs.push(load(x, y));
+  // 내 주변 z12 3×3
+  const fx = Math.floor(lon2x(lon, ZF)), fy = Math.floor(lat2y(lat, ZF));
+  for (let x = fx - 1; x <= fx + 1; x++) for (let y = fy - 1; y <= fy + 1; y++) jobs.push(load(x, y, ZF));
   await Promise.all(jobs);
 }
 
 export const loadedTiles = () => [...tiles.values()].filter(v => v instanceof Float32Array).length;
 
-/** 해발 높이(m, 양선형 보간). 타일이 없으면 NaN. */
+/** 해발 높이(m, 양선형 보간): 촘촘한 z12가 있으면 그것, 없으면 z10. 둘 다 없으면 NaN. */
 export function elevation(lat, lon) {
-  const fx = lon2x(lon), fy = lat2y(lat);
+  const v = sample(lat, lon, ZF);
+  return Number.isNaN(v) ? sample(lat, lon, Z) : v;
+}
+
+function sample(lat, lon, z) {
+  const fx = lon2x(lon, z), fy = lat2y(lat, z);
   const tx = Math.floor(fx), ty = Math.floor(fy);
-  const h = tiles.get(`${tx}/${ty}`);
+  const h = tiles.get(`${z}/${tx}/${ty}`);
   if (!(h instanceof Float32Array)) return NaN;
   const px = (fx - tx) * N - 0.5, py = (fy - ty) * N - 0.5;
   const x0 = Math.max(0, Math.min(N - 1, Math.floor(px))), y0 = Math.max(0, Math.min(N - 1, Math.floor(py)));

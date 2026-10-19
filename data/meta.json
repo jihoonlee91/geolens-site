@@ -1,21 +1,24 @@
 {
-  "generated": "2026-10-12T23:31:30+00:00",
-  "source": "kr.osm.pbf",
-  "counts": {
-    "nature": 35905,
-    "natureTiles": 80,
-    "sights": 18268,
-    "food": 98055,
-    "sightsTiles": 1107,
-    "foodTiles": 4509,
-    "trailWays": 17223,
-    "trailTiles": 2514
-  },
-  "grid": {
-    "nature": 0.5,
-    "sights": 0.1,
-    "food": 0.02,
-    "trails": 0.05
-  },
-  "license": "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright"
+    "generated":  "2026-10-12T23:31:30+00:00",
+    "source":  "kr.osm.pbf",
+    "counts":  {
+                   "nature":  35905,
+                   "natureTiles":  80,
+                   "sights":  18268,
+                   "food":  98055,
+                   "sightsTiles":  1107,
+                   "foodTiles":  4509,
+                   "trailWays":  17223,
+                   "trailTiles":  2514,
+                   "lineWays":  401421,
+                   "lineTiles":  25994
+               },
+    "grid":  {
+                 "nature":  0.5,
+                 "sights":  0.1,
+                 "food":  0.02,
+                 "trails":  0.05,
+                 "lines":  0.02
+             },
+    "license":  "© OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright"
 }

@@ -32,9 +32,10 @@ jobs:
         run: cp data/meta.json /tmp/old-meta.json
       - name: Build tiles
         run: |
-          rm -rf data/nature data/sights data/food data/trails
+          rm -rf data/nature data/sights data/food data/trails data/lines
           python tools/build_osm_tiles.py /tmp/kr.osm.pbf data
           python tools/build_trail_tiles.py /tmp/kr.osm.pbf data
+          python tools/build_line_tiles.py /tmp/kr.osm.pbf data
       - name: Famous peaks (100대 명산 → 새 OSM 봉우리 번호)
         run: |
           python tools/build_famous_peaks.py tools/famous_peaks.csv data | tee /tmp/famous.log

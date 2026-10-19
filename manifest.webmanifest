@@ -12,6 +12,7 @@
   "background_color": "#08090c",
   "theme_color": "#08090c",
   "categories": ["navigation", "travel", "sports"],
+  "share_target": { "action": "./", "method": "GET", "params": { "title": "title", "text": "text", "url": "url" } },
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

@@ -4,6 +4,8 @@
 import { OrientationFilter, qaxis, qmul, qrot, qrotInv, qnorm, qFromEuler, cameraAzEl } from '../js/fusion.js';
 import { GpsFilter } from '../js/gps.js';
 import { romanize } from '../js/hangul.js';
+import { moonAltAz } from '../js/sky.js';
+import { planets, Sgp4 } from '../js/space.js';
 import { haversine, bearing, elevationAngle, sunAltAz, nextSunEvent, wrap180, fromEnu } from '../js/geo.js';
 
 let fails = 0;
@@ -111,6 +113,24 @@ check('영점 오차 1.7°/s: 방위 오차', r.meanErr < 1.2, `평균 ${r.meanE
   check('해돋이 시각·방위', ev.rise && Math.abs(mins - (6 * 60 + 36)) <= 2 && Math.abs(ev.az - 98.2) < 1, `${kst.toISOString().slice(11, 16)} KST, ${ev.az.toFixed(1)}°`);
   const s = sunAltAz(new Date('2026-06-21T03:30:00Z'), 37.5665, 126.978); // 하지 정오 무렵: 고도 ≈ 75.9°
   check('태양 남중 고도(하지)', Math.abs(s.alt - 75.9) < 0.6, `${s.alt.toFixed(2)}°, 방위 ${s.az.toFixed(1)}°`); }
+
+// 8-2) 달: 2026-10-26 보름(밝은 면 > 95%), 2026-10-10 그믐·삭(< 5%), 거리 356,000~407,000 km
+{ const full = moonAltAz(new Date('2026-10-26T12:00:00Z'), 37.5665, 126.978), nw = moonAltAz(new Date('2026-10-10T12:00:00Z'), 37.5665, 126.978);
+  check('달 위상', full.lit > 0.95 && nw.lit < 0.05 && full.distKm > 356000 && full.distKm < 407000, `보름 ${(full.lit * 100).toFixed(1)}%, 삭 ${(nw.lit * 100).toFixed(1)}%, 거리 ${Math.round(full.distKm)} km`); }
+
+// 8-3) JPL Horizons 기준(서울시청, 2026-10-11 01:00 UTC, 굴절 포함 — 앱 시험과 같은 값): 해·달·목성 0.15° 안
+{ const t = new Date('2026-10-11T01:00:00Z'), la = 37.5665, lo = 126.978;
+  const s = sunAltAz(t, la, lo), m = moonAltAz(t, la, lo), j = planets(t, la, lo).find(p => p.id === 'jupiter');
+  const near = (a, b) => Math.abs(wrap180(a - b)) < 0.15;
+  check('해 위치(JPL)', near(s.az, 136.3738) && near(s.alt, 34.9608), `az ${s.az.toFixed(3)} alt ${s.alt.toFixed(3)}`);
+  check('달 위치(JPL)', near(m.az, 137.3320) && near(m.alt, 28.0504), `az ${m.az.toFixed(3)} alt ${m.alt.toFixed(3)}`);
+  check('목성 위치(JPL)', near(j.az, 219.5450) && near(j.alt, 62.5117), `az ${j.az.toFixed(3)} alt ${j.alt.toFixed(3)}`); }
+
+// 8-4) SGP4: Vallado 검증 위성 00005, t=0 / 360분 (km, 앱 시험과 같은 값)
+{ const sat = new Sgp4(2451544.5 + 179.78495062 - 1, 10.82419157, 0.1859667, 34.2682, 348.7242, 331.7664, 19.3264, 0.28098e-4);
+  const r0 = sat.propagate(0), r1 = sat.propagate(360);
+  const e0 = Math.hypot(r0[0] - 7022.46529266, r0[1] + 1400.08296755, r0[2] - 0.03995155), e1 = Math.hypot(r1[0] + 7154.03120202, r1[1] + 3783.17682504, r1[2] + 3536.19412294);
+  check('SGP4(Vallado 00005)', e0 < 0.02 && e1 < 0.1, `오차 t0 ${e0.toFixed(4)} km, t360 ${e1.toFixed(4)} km`); }
 
 // 9) 로마자(앱과 같은 사례)
 for (const [ko, en] of [['율리봉', 'Yullibong'], ['독립문', 'Dongnimmun'], ['종로', 'Jongno'], ['명동9길', 'Myeongdong 9-gil'], ['북한산 백운대', 'Bukhansan Baegundae'], ['신라', 'Silla']])
