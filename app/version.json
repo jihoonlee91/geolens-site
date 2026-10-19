@@ -1,7 +1,7 @@
 {
-  "versionCode": 7,
-  "versionName": "1.0.7",
-  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.7/GeoLens.apk",
-  "notes": "공유 카드(정상 사진에 봉우리 이름·지오렌즈 표시 → 갤러리 저장·공유), 해돋이·해넘이 방향 라벨",
-  "notesEn": "Share card (peak names on your photo, save and share), sunrise and sunset direction labels"
+  "versionCode": 8,
+  "versionName": "1.0.8",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.8/GeoLens.apk",
+  "notes": "봉우리 도감: 산 라벨을 열면 담기고, 정상에 서면 자동 '정상 인증'. 100대 명산(산림청·블랙야크) 진행률, 정상 사진 남기기, 기록 내보내기",
+  "notesEn": "Peak collection: tap peak labels to collect them, automatic summit check-in, Top 100 progress, summit photo, CSV export"
 }
