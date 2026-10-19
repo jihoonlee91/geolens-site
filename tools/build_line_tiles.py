@@ -84,10 +84,11 @@ class Ways(osmium.SimpleHandler):
                 return
             if name and any(b in name for b in BANNED):
                 return
-            kind = "t" if (name and not name[0].isdigit()) or w.id in self.route_name else "p"
-            # 이름 없는 보도·계단은 대부분 도시 인도 → 빼고, 이름 없는 길은 산길(path·track·bridleway)만
-            if kind == "p" and hw in ("footway", "steps"):
+            in_route = w.id in self.route_name
+            # 보도·계단은 도시 인도·지하철 출입구가 대부분 → 등산 경로에 속한 것만
+            if hw in ("footway", "steps") and not in_route:
                 return
+            kind = "t" if (name and not name[0].isdigit()) or in_route else "p"
             tol = 4.0 if kind == "t" else 6.0
         elif ww in ("river", "canal"):
             kind, tol = "r", 10.0
