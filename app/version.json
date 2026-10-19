@@ -1,7 +1,7 @@
 {
-  "versionCode": 9,
-  "versionName": "1.0.9",
-  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.9/GeoLens.apk",
-  "notes": "길찾기에서 네이버·카카오·구글 지도 앱 고르기. 웹 버전 출시: 크롬에서 jihoonlee91.github.io/geolens-site 열고 홈 화면에 설치",
-  "notesEn": "Directions: choose Naver, Kakao or Google Maps. Web version: open jihoonlee91.github.io/geolens-site in Chrome and install"
+  "versionCode": 10,
+  "versionName": "1.0.10",
+  "apk": "https://github.com/jihoonlee91/geolens-site/releases/download/v1.0.10/GeoLens.apk",
+  "notes": "가로 화면 지원: 폰을 눕혀도 라벨·방향이 맞고 버튼 크기 그대로",
+  "notesEn": "Landscape support: labels and direction stay right when you turn the phone sideways"
 }
