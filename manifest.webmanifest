@@ -1,0 +1,21 @@
+{
+  "name": "피크렌즈 — 비추면 산 이름이 보여요",
+  "short_name": "피크렌즈",
+  "description": "카메라로 비추면 산봉우리 이름·거리·높이. 100대 명산 도감과 정상 인증, 해돋이 방향.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "categories": ["navigation", "travel", "sports"],
+  "share_target": { "action": "./", "method": "GET", "params": { "title": "title", "text": "text", "url": "url" } },
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

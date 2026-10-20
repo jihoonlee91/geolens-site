@@ -2,25 +2,148 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="robots" content="noindex">
 <title>피크렌즈</title>
+<meta name="theme-color" content="#08090c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-  :root { color-scheme: dark; }
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #08090c; color: rgba(255,255,255,.9);
-    font: 16px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; text-align: center; padding: 0 16px; }
-  img { width: 88px; height: 88px; border-radius: 22px; }
-  p { color: rgba(255,255,255,.55); }
-  a { color: #e8c987; }
+  /* 로그인 화면(shell): 공개 사이트에는 이것만. 앱 본체는 로그인한 시험 사용자에게만 DB에서 내려준다. */
+  html, body { margin: 0; background: #08090c; }
+  #gate { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 0 16px; box-sizing: border-box; color: rgba(255,255,255,.9);
+    font: 16px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; text-align: center; color-scheme: dark; }
+  #gate main { max-width: 360px; width: 100%; }
+  #gate img { width: 88px; height: 88px; border-radius: 22px; }
+  #gate h1 { margin: 12px 0 4px; font-size: 26px; }
+  #gate p { margin: 8px 0; color: rgba(255,255,255,.6); }
+  #gate .msg { min-height: 1.6em; }
+  #gate .err { color: #f0a08c; }
+  #gate button { display: block; width: 100%; margin: 18px 0 0; padding: 14px 16px; border: 0; border-radius: 14px; font: 600 16px/1.2 inherit;
+    background: #e8c987; color: #14110a; cursor: pointer; }
+  #gate button.ghost { background: transparent; color: rgba(255,255,255,.75); border: 1px solid rgba(255,255,255,.2); margin-top: 10px; }
+  #gate button[hidden] { display: none; }
+  #gate .small { font-size: 13px; margin-top: 24px; }
+  #gate a { color: #e8c987; }
 </style>
 </head>
 <body>
-<main>
-  <img src="icons/icon-192.png" alt="">
-  <h1>피크렌즈</h1>
-  <p>비공개로 시험 중인 앱이에요.</p>
-  <p><a href="privacy.html">개인정보처리방침</a></p>
-</main>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+<div id="gate">
+  <main>
+    <img src="icons/icon-192.png" alt="">
+    <h1>피크렌즈</h1>
+    <p>폰을 들어 비추면 산 이름·거리·높이가 보여요.</p>
+    <p class="msg" id="msg">불러오는 중…</p>
+    <button id="login" hidden>Google로 로그인</button>
+    <button id="other" class="ghost" hidden>다른 계정으로 로그인</button>
+    <p class="small">비공개로 시험 중인 앱이에요. 초대받은 계정만 쓸 수 있어요.<br>
+      <a href="privacy.html">개인정보처리방침</a> · <a href="https://github.com/jihoonlee91/geolens-site/releases/latest/download/GeoLens.apk">안드로이드 앱(APK)</a></p>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  const SB_URL = 'https://jdidzokxoaxqcnraowyu.supabase.co';
+  const SB_KEY = 'sb_publishable_sgaob3nqRHgAaKBs_4yclw_-Wq7stKH'; // 공개 키(접근은 로그인·허용 목록·RLS로 막음)
+  const CACHE = 'peaklens-app', BUNDLE_URL = 'peaklens-bundle.json', OK_KEY = 'peaklens.ok';
+  const $ = id => document.getElementById(id);
+  const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { } } };
+
+  // 앱이 실리기 전에 오는 설치 이벤트는 여기서 잡아 두고 앱이 가져간다
+  let installEvt = null;
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
+
+  // 상지홈과 같은 출처라도 로그인은 따로(저장 키가 다름)
+  const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, {
+    auth: { storageKey: 'peaklens-auth', flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true },
+  }) : null;
+
+  async function signOut() {
+    ls.set(OK_KEY, null);
+    try { await caches.delete(CACHE); } catch { }
+    // 다른 탭이 로그인 잠금을 쥐고 멈춰 있어도 나가지도록: 3초 넘으면 이 기기의 로그인 정보만 지운다
+    try { await Promise.race([sb?.auth.signOut({ scope: 'local' }), new Promise(r => setTimeout(r, 3000))]); } catch { }
+    ls.set('peaklens-auth', null); ls.set('peaklens-auth-code-verifier', null);
+    location.replace(location.pathname);
+  }
+  window.__peaklens = { sb, email: ls.get(OK_KEY), signOut, takeInstall() { const e = installEvt; installEvt = null; return e; } };
+
+  const show = (text, { login = false, other = false, err = false } = {}) => {
+    $('msg').textContent = text; $('msg').className = 'msg' + (err ? ' err' : '');
+    $('login').hidden = !login; $('other').hidden = !other;
+  };
+  const signIn = () => sb.auth.signInWithOAuth({ provider: 'google',
+    options: { redirectTo: location.origin + location.pathname, queryParams: { prompt: 'select_account' } } });
+  $('login').onclick = signIn;
+  $('other').onclick = async () => { try { await Promise.race([sb.auth.signOut({ scope: 'local' }), new Promise(r => setTimeout(r, 3000))]); } catch { } signIn(); };
+
+  async function readCached() {
+    try { const r = await (await caches.open(CACHE)).match(BUNDLE_URL); return r ? await r.json() : null; } catch { return null; }
+  }
+  async function saveCached(v, body) {
+    try { await (await caches.open(CACHE)).put(BUNDLE_URL, new Response(JSON.stringify({ v, body }), { headers: { 'Content-Type': 'application/json' } })); } catch { }
+  }
+
+  let ran = false;
+  function run(body) {
+    if (ran) return; ran = true;
+    $('gate').remove();
+    const st = document.createElement('style'); st.textContent = body.css || ''; document.head.appendChild(st);
+    document.body.insertAdjacentHTML('afterbegin', body.html);
+    const s = document.createElement('script'); s.textContent = body.js; document.body.appendChild(s);
+  }
+
+  async function fetchBundle(have) {
+    const { data, error } = await sb.rpc('geolens_bundle', { p_have: have ?? null });
+    if (error) throw error;
+    return data;
+  }
+
+  // 받아 둔 앱이 있으면 바로 실행(산에서 신호가 없어도), 새 버전·권한은 뒤에서 확인해 다음 실행에 반영
+  async function refresh(cached) {
+    if (!sb || !navigator.onLine) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      const r = await fetchBundle(cached.v);
+      if (!r.ok) { ls.set(OK_KEY, null); try { await caches.delete(CACHE); } catch { } return; }
+      if (r.bundle) await saveCached(r.v, r.bundle);
+    } catch { }
+  }
+
+  async function boot() {
+    const q = new URLSearchParams(location.search);
+    const oauthErr = q.get('error_description') || q.get('error');
+    const cached = await readCached();
+    if (ls.get(OK_KEY) && cached && !q.has('code')) { run(cached.body); refresh(cached); return; }
+    if (!sb) return show('인터넷에 연결된 뒤 다시 열어 주세요.', { err: true });
+    const got = await Promise.race([sb.auth.getSession(), new Promise(r => setTimeout(() => r(null), 10000))]);
+    if (!got) return show('로그인 확인이 멈췄어요. 피크렌즈 창을 모두 닫고 다시 열어 주세요.', { err: true, login: true });
+    const session = got.data.session;
+    if (q.has('code') || oauthErr) history.replaceState(null, '', location.pathname);
+    if (!session) return show(oauthErr ? `로그인하지 못했어요: ${oauthErr}` : '', { login: true, err: !!oauthErr });
+    show('앱을 받는 중…');
+    let r;
+    try { r = await fetchBundle(cached?.v); }
+    catch (e) { return cached && ls.get(OK_KEY) ? run(cached.body) : show('앱을 받지 못했어요. 잠시 뒤 다시 열어 주세요.', { err: true, other: true }); }
+    if (!r.ok) {
+      ls.set(OK_KEY, null); try { await caches.delete(CACHE); } catch { }
+      return show(`${r.email || '이 계정'}은(는) 아직 초대되지 않았어요.`, { other: true, err: true });
+    }
+    const body = r.bundle || cached?.body;
+    if (!body) return show('아직 올라간 앱이 없어요.', { err: true });
+    if (r.bundle) await saveCached(r.v, r.bundle);
+    ls.set(OK_KEY, session.user.email || 'ok');
+    window.__peaklens.email = session.user.email;
+    run(body);
+  }
+  boot().catch(() => show('문제가 생겼어요. 다시 열어 주세요.', { err: true, login: !!sb }));
+})();
+</script>
 </body>
 </html>
