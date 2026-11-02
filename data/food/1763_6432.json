@@ -1,1 +1,1 @@
-{"elements":[{"type":"node","id":10917829298,"tags":{"amenity":"restaurant","name":"무학산오리하우스"},"lat":35.268581,"lon":128.640009}]}
+{"elements":[{"type":"node","id":10917829298,"tags":{"amenity":"restaurant","name":"무학산오리하우스"},"lat":35.268581,"lon":128.640009},{"type":"way","id":1177457231,"tags":{"amenity":"cafe","building":"yes","name":"산마루카페"},"center":{"lat":35.267395,"lon":128.641573}}]}
